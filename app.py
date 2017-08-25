@@ -1,9 +1,11 @@
 from flask import Flask, request, make_response, redirect, abort, render_template
 from flask_script import Manager
+from flask_bootstrap import Bootstrap
 
 app = Flask(__name__)
 
 manger = Manager(app)
+bootstrap = Bootstrap(app)
 
 @app.route('/')
 def index():
