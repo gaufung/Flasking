@@ -1,10 +1,11 @@
 from flask import Flask, request, make_response, redirect, abort, render_template, session, url_for
-from flask_script import Manager
+from flask_script import Manager, Shell
 from flask_bootstrap import Bootstrap
 from flask_wtf  import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import Required
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate, MigrateCommand
 
 app = Flask(__name__)
 
@@ -37,6 +38,13 @@ class NameForm(FlaskForm):
     name = StringField('What is your name?', validators=[Required()])
     submit = SubmitField('Submit')
 
+def make_shell_context():
+    return dict(app=app, db=db, User=User, Role=Role)
+manger.add_command("shell", Shell(make_context=make_shell_context))
+
+migrate = Migrate(app, db)
+manger.add_command('db', MigrateCommand)
+
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
@@ -49,9 +57,18 @@ def internet_server_error(e):
 def index():
     form = NameForm()
     if form.validate_on_submit():
-        session['name']= form.name.data
+        user = User.query.filter_by(username=form.name.data).first()
+        if user is None:
+            user = User(username=form.name.data)
+            db.session.add(user)
+            session['known']=False
+        else:
+            session['known']=True
+        session['name']=form.name.data
+        form.name.data=''
         return redirect(url_for('index'))
-    return render_template('index.html', form=form, name=session.get('name'))
+    return render_template('index.html', form=form, name=session.get('name'),
+            known=session.get('known',False))
 
 @app.route('/user/<name>')
 def user(name):
