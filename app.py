@@ -1,4 +1,5 @@
 import os
+from threading import Thread
 from flask import Flask, request, make_response, redirect, abort, render_template, session, url_for
 from flask_script import Manager, Shell
 from flask_bootstrap import Bootstrap
@@ -56,12 +57,18 @@ manger.add_command("shell", Shell(make_context=make_shell_context))
 migrate = Migrate(app, db)
 manger.add_command('db', MigrateCommand)
 
+def send_async_email(app, msg):
+    with app.app_contex():
+        mail.send(msg)
+
 def send_email(to, subject, template, **kw):
     msg = Message(app.config['FLASKY_MAIL_SUBJECT_PREFIX']+subject,
     sender=app.config['FLASKY_MAIL_SENDER'], recipients=[to])
     msg.body=render_template(template+'.txt', **kw)
     msg.html=render_template(template+'.html', **kw)
-    mail.send(msg)
+    t = Thread(target=send_async_email, args=(app, msg,))
+    t.start()
+    return t
 
 @app.errorhandler(404)
 def page_not_found(e):
