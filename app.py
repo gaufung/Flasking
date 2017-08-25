@@ -1,7 +1,9 @@
 from flask import Flask, request, make_response, redirect, abort
+from flask_script import Manager
 
 app = Flask(__name__)
 
+manger = Manager(app)
 
 @app.route('/')
 def index():
@@ -14,4 +16,4 @@ def user(id):
     return '<h1>Hello %s</h1>' % id
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    manger.run()
