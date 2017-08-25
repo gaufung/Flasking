@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request, make_response, redirect, abort, render_template, session, url_for
 from flask_script import Manager, Shell
 from flask_bootstrap import Bootstrap
@@ -6,6 +7,7 @@ from wtforms import StringField, SubmitField
 from wtforms.validators import Required
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate, MigrateCommand
+from flask_mail import Mail
 
 app = Flask(__name__)
 
@@ -15,8 +17,14 @@ app.config['SECRET_KEY']='hard to guess string'
 app.config['SQLALCHEMY_DATABASE_URI']='mysql+pymysql://root:admin@localhost/test'
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['MAIL_SERVER']='smtp.126.com'
+app.config['MAIL_PORT']= 25
+app.config['MAIL_USE_TLS']=True
+app.config['MAIL_USERNAME']=os.environ.get('MAIL_USERNAME')
+app.config['MAIL_PASSWORD']=os.environ.get('MAIL_PASSWORD')
 
 db = SQLAlchemy(app)
+mail = Mail(app)
 
 class Role(db.Model):
     __tablename__ = 'roles'
