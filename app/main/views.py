@@ -6,7 +6,9 @@ from . import main
 from .forms import NameForm
 from .. import db, mail
 from ..models import User
-
+from ..decorators import admin_required, permisson_required
+from ..models import Permission
+from flask_login import login_required
 
 # def send_async_email(app, msg):
 #     with app.app_contex():
@@ -41,3 +43,16 @@ def index():
         return redirect(url_for('main.index'))
     return render_template('index.html', form=form, name=session.get('name'),
             known=session.get('known',False))
+
+
+@main.route('/admin')
+@login_required
+@admin_required
+def for_admin_only():
+    return 'for adminstrators'
+
+@main.route('/moderator')
+@login_required
+@permisson_required(Permission.MODERATE_COMMENTS)
+def for_moderator_only():
+    return 'For comment moderators'
