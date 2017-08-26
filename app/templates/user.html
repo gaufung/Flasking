@@ -3,6 +3,28 @@
 
 {% block page_content %}
 <div class="page-header">
-    <h1>Hello {{ name }}!</h1>
+    <h1>
+        {{ user.username }}
+    </h1>
+    {% if user.name or user.location %}
+    <p>
+        {% if user.name %}
+        {{ user.name }}
+        {% endif %}
+        {% if user.location %}
+            From <a href="http://maps.google.com/?q={{ user.location }}">{{ user.location }}</a>
+        {% endif %}
+    </p>
+    {% endif %}
+    {% if current_user.is_adminstrator() %}
+        <p><a href="mailto:{{ user.email }}">{{ user.email }}</a></p>
+    {% endif %}
+    {% if user.about_me %}
+        <p>{{ user.about_me }}</p>
+    {% endif %}
+    <p>
+        Member Since {{ user.member_since}}
+        Last Seen {{ user.last_seen }}
+    </p>
 </div>
 {% endblock %}
