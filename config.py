@@ -5,7 +5,7 @@ class Config(object):
     SQLALCHEMY_COMMIT_ON_TEARDONW = True
     FLASKY_MAIL_SUBJECT_PREFIX = '[FLASKY]'
     FLASKY_MAIL_SENDER = 'FLASKY Admin <gaofengcumt@126.com>'
-    FLASK_ADMIN = os.environ.get('FLASKY_ADMIN')
+    FLASKY_ADMIN = os.environ.get('FLASKY_ADMIN')
     SQLALCHEMY_TRACK_MODIFICATIONS=False
     @staticmethod
     def init_app(app):
