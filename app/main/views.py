@@ -1,14 +1,14 @@
 from datetime import datetime
 from threading import Thread
-from flask import render_template, session, redirect, url_for,abort
+from flask import render_template, session, redirect, url_for,abort,flash
 from flask_mail import Message
 from . import main
-# from .forms import NameForm
+from .forms import EditProfileForm
 from .. import db, mail
 from ..models import User
 from ..decorators import admin_required, permisson_required
 from ..models import Permission
-from flask_login import login_required
+from flask_login import login_required, current_user
 
 # def send_async_email(app, msg):
 #     with app.app_contex():
@@ -67,3 +67,20 @@ def for_admin_only():
 @permisson_required(Permission.MODERATE_COMMENTS)
 def for_moderator_only():
     return 'For comment moderators'
+
+@main.route('/edit-profile', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    form = EditProfileForm()
+    if form.validate_on_submit():
+        current_user.name = form.name.data
+        current_user.location = form.location.data
+        current_user.about_me = form.about_me.data
+        db.session.add(current_user)
+        db.session.commit()
+        flash('Your profile has been updated')
+        return redirect(url_for('.user', username=current_user.username))
+    form.name.data = current_user.name
+    form.location.data = current_user.location
+    form.about_me.data = current_user.about_me
+    return render_template('edit_profile.html', form=form)

@@ -26,5 +26,10 @@
         Member Since {{ user.member_since}}
         Last Seen {{ user.last_seen }}
     </p>
+    <p>
+            {% if user == current_user %}
+            <a class="btn btn-default" href="{{ url_for('.edit_profile') }}">Edit Profile</a>
+            {% endif %}
+        </p>
 </div>
 {% endblock %}
