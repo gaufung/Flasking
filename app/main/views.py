@@ -2,24 +2,13 @@ from datetime import datetime
 from threading import Thread
 from flask import render_template, session, redirect, url_for
 from flask_mail import Message
+from flask_login import login_required
 from . import main
 from .forms import NameForm
 from .. import db, mail
 from ..models import User
 
 
-# def send_async_email(app, msg):
-#     with app.app_contex():
-#         mail.send(msg)
-
-# def send_email(to, subject, template, **kw):
-#     msg = Message(app.config['FLASKY_MAIL_SUBJECT_PREFIX']+subject,
-#     sender=app.config['FLASKY_MAIL_SENDER'], recipients=[to])
-#     msg.body=render_template(template+'.txt', **kw)
-#     msg.html=render_template(template+'.html', **kw)
-#     t = Thread(target=send_async_email, args=(app, msg,))
-#     t.start()
-#     return t
 
 @main.route('/', methods=['GET', 'POST'])
 def index():
@@ -41,3 +30,13 @@ def index():
         return redirect(url_for('main.index'))
     return render_template('index.html', form=form, name=session.get('name'),
             known=session.get('known',False))
+
+@main.route('/user/<name>')
+def user(name):
+    return render_template('user.html', name=name)
+
+
+@main.route('/secret')
+@login_required
+def secret():
+    return 'Only authenticated users are allowed'
