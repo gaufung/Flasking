@@ -3,11 +3,11 @@ from threading import Thread
 from flask import render_template, session, redirect, url_for,abort,flash, request, current_app, make_response
 from flask_mail import Message
 from . import main
-from .forms import EditProfileForm, EditProfileAdminForm, PostFrom
+from .forms import EditProfileForm, EditProfileAdminForm, PostFrom, CommentForm
 from .. import db, mail
 from ..models import User, Role, Post
 from ..decorators import admin_required, permisson_required
-from ..models import Permission
+from ..models import Permission, Comment
 from flask_login import login_required, current_user
 
 # def send_async_email(app, msg):
@@ -144,10 +144,24 @@ def edit_profile_admin(id):
     return render_template('edit_profile.html', form=form, user=user)
 
 
-@main.route('/post/<int:id>')
+@main.route('/post/<int:id>', methods=['GET', 'POST'])
 def post(id):
     post = Post.query.get_or_404(id)
-    return render_template('post.html', posts=[post])
+    form = CommentForm()
+    if form.validate_on_submit():
+        comment = Comment(body=form.body.data,post=post,author=current_user._get_current_object())
+        db.session.add(comment)
+        db.session.commit()
+        flash('Your comment has been published.')
+        return redirect(url_for('.post', id=post.id, page=-1))
+    page = request.args.get('page',1,type=int)
+    if page == -1:
+        page = (post.comments.count() -1 )/ 10 +1
+    paginaiton = post.comments.order_by(Comment.timestamp.asc()).paginate(
+        page, per_page=10, error_out=False
+    )
+    comments = paginaiton.items
+    return render_template('post.html', posts=[post], form=form, comments=comments, paginaiton=paginaiton)
 
 @main.route('/edit/<int:id>', methods=['GET', 'POST'])
 def edit(id):
