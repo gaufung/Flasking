@@ -1,6 +1,6 @@
 from datetime import datetime
 from threading import Thread
-from flask import render_template, session, redirect, url_for,abort,flash
+from flask import render_template, session, redirect, url_for,abort,flash, request, current_app
 from flask_mail import Message
 from . import main
 from .forms import EditProfileForm, EditProfileAdminForm, PostFrom
@@ -52,8 +52,12 @@ def index():
         db.session.add(post)
         db.session.commit()
         return redirect(url_for('.index'))
-    posts = Post.query.order_by(Post.timestamp.desc()).all()
-    return render_template('index.html', form=form, posts=posts)
+    page = request.args.get('page', 1, type=int)
+    pagenation = Post.query.order_by(Post.timestamp.desc()).paginate(
+        page, per_page=10,
+        error_out=False)
+    posts = pagenation.items
+    return render_template('index.html', form=form, posts=posts,pagenation=pagenation)
 
 @main.route('/user/<username>')
 def user(username):

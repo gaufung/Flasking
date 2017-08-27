@@ -3,6 +3,7 @@ import os
 class Config(object):
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard to guess string'
     SQLALCHEMY_COMMIT_ON_TEARDONW = True
+    FALSKY_POST_PER_PAGE = 10
     FLASKY_MAIL_SUBJECT_PREFIX = '[FLASKY]'
     FLASKY_MAIL_SENDER = 'FLASKY Admin <gaofengcumt@126.com>'
     FLASKY_ADMIN = os.environ.get('FLASKY_ADMIN')
