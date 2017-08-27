@@ -3,9 +3,9 @@ from threading import Thread
 from flask import render_template, session, redirect, url_for,abort,flash
 from flask_mail import Message
 from . import main
-from .forms import EditProfileForm, EditProfileAdminForm
+from .forms import EditProfileForm, EditProfileAdminForm, PostFrom
 from .. import db, mail
-from ..models import User, Role
+from ..models import User, Role, Post
 from ..decorators import admin_required, permisson_required
 from ..models import Permission
 from flask_login import login_required, current_user
@@ -44,9 +44,16 @@ from flask_login import login_required, current_user
 #     return render_template('index.html', form=form, name=session.get('name'),
 #             known=session.get('known',False))
 
-@main.route('/')
+@main.route('/', methods=['GET','POST'])
 def index():
-    return render_template('index.html')
+    form = PostFrom()
+    if current_user.can(Permission.WRITE_ARTICLES) and form.validate_on_submit():
+        post = Post(body=form.body.data, author=current_user._get_current_object())
+        db.session.add(post)
+        db.session.commit()
+        return redirect(url_for('.index'))
+    posts = Post.query.order_by(Post.timestamp.desc()).all()
+    return render_template('index.html', form=form, posts=posts)
 
 @main.route('/user/<username>')
 def user(username):
