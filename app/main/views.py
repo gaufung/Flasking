@@ -6,7 +6,7 @@ from . import main
 from .forms import EditProfileForm, EditProfileAdminForm, PostFrom, CommentForm
 from .. import db, mail
 from ..models import User, Role, Post
-from ..decorators import admin_required, permisson_required
+from ..decorators import admin_required, permission_required
 from ..models import Permission, Comment
 from flask_login import login_required, current_user
 
@@ -97,7 +97,7 @@ def for_admin_only():
 
 @main.route('/moderator')
 @login_required
-@permisson_required(Permission.MODERATE_COMMENTS)
+@permission_required(Permission.MODERATE_COMMENTS)
 def for_moderator_only():
     return 'For comment moderators'
 
@@ -181,7 +181,7 @@ def edit(id):
 
 @main.route('/follow/<username>')
 @login_required
-@permisson_required(Permission.FOLLOW)
+@permission_required(Permission.FOLLOW)
 def follow(username):
     user = User.query.filter_by(username=username).first()
     if user is None:
@@ -196,7 +196,7 @@ def follow(username):
 
 @main.route('/follow/<username>')
 @login_required
-@permisson_required(Permission.FOLLOW)
+@permission_required(Permission.FOLLOW)
 def unfollow(username):
     user = User.query.filter_by(username=username).first()
     if user is None:
@@ -244,7 +244,7 @@ def followed_by(username):
 
 @main.route('/moderate')
 @login_required
-@permisson_required(Permission.MODERATE_COMMENTS)
+@permission_required(Permission.MODERATE_COMMENTS)
 def moderate():
     page = request.args.get('page', 1, type=int)
     pagination = Comment.query.order_by(Comment.timestamp.desc()).paginate(
@@ -256,7 +256,7 @@ def moderate():
 
 @main.route('/moderate/enable/<int:id>')
 @login_required
-@permisson_required(Permission.MODERATE_COMMENTS)
+@permission_required(Permission.MODERATE_COMMENTS)
 def moderate_enable(id):
     comment = Comment.query.get_or_404(id)
     comment.disabled = False
@@ -268,7 +268,7 @@ def moderate_enable(id):
 
 @main.route('/moderate/disable/<int:id>')
 @login_required
-@permisson_required(Permission.MODERATE_COMMENTS)
+@permission_required(Permission.MODERATE_COMMENTS)
 def moderate_disable(id):
     comment = Comment.query.get_or_404(id)
     comment.disabled = True
