@@ -18,6 +18,15 @@ def make_shell_context():
 manager.add_command('Shell', Shell(make_context=make_shell_context))
 manager.add_command('db', MigrateCommand)
 
+
+@manager.command
+def profile(length=25, profile_dir=None):
+    '''start the application under the code profiler'''
+    from werkzeug.contrib.profiler import ProfilerMiddleware
+    app.wsgi_app=ProfilerMiddleware(app.wsgi_app, restrictions=[length],
+                                    profile_dir=profile_dir)
+    app.run()
+
 @manager.command
 def test(coverage=False):
     '''Run unit Test'''
