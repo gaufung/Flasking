@@ -23,6 +23,7 @@ class DevelopmentConfig(Config):
 
 class TestingConfig(Config):
     TESTING = True
+    WTF_CSRF_ENABLE=False
     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:admin@localhost/test'
 
 class ProductionConfig(Config):
