@@ -7,6 +7,10 @@ class Config(object):
     FLASKY_MAIL_SUBJECT_PREFIX = '[FLASKY]'
     SQLALCHEMY_RECORD_QUERIES=True
     FLASKY_DB_QUERY_TIMEOUT=0.5
+    MAIL_SERVER = 'smtp.126.com'
+    MAIL_PORT = 25
+    MAIL_USERNAME='gaofengcumt@126.com'
+    MAIL_PASSWORD = 'gaofeng126123'
     FLASKY_MAIL_SENDER = 'FLASKY Admin <gaofengcumt@126.com>'
     FLASKY_ADMIN = os.environ.get('FLASKY_ADMIN')
     SQLALCHEMY_TRACK_MODIFICATIONS=False
@@ -30,6 +34,29 @@ class TestingConfig(Config):
 
 class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:admin@localhost/prodution'
+
+    @classmethod
+    def init_app(cls, app):
+        Config.init_app(app)
+
+        import logging
+        from logging.handlers import SMTPHandler
+        credentials = None
+        secure = None
+        if getattr(cls, 'MAIL_USERNAME', None) is not None:
+            credentials = (cls.MAIL_USERNAME, cls.MAIL_PASSWORD)
+            if getattr(cls, 'MAIL_USE_TLS', None):
+                secure = ()
+        mail_handler = SMTPHandler(
+            mailhost=(cls.MAIL_SERVER, cls.MAIL_PORT),
+            fromaddr=cls.FLASKY_MAIL_SENDER,
+            toaddrs=[cls.FLASKY_ADMIN],
+            subject=cls.FLASKY_MAIL_SUBJECT_PREFIX+' Application Error',
+            credentials=credentials,
+            secure=secure
+        )
+        mail_handler.setLevel(logging.ERROR)
+        app.logger.addHandler(mail_handler)
 
 
 config= {
